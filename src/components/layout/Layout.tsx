@@ -1,0 +1,513 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { mockNotifications } from "@/data/mockData";
+import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/appStore";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Activity,
+  Bell,
+  CheckSquare,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  FilePlus,
+  FolderOpen,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Moon,
+  Palette,
+  Settings,
+  Settings2,
+  ShieldAlert,
+  ShieldCheck,
+  Sun,
+  Trophy,
+  User,
+  Wallet,
+  Zap,
+  Lock,
+  CreditCard,
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { ChatButton } from "@/components/chat/ChatButton";
+import { ChatPanel } from "@/components/chat/ChatPanel";
+import { ProactiveAlert } from "@/components/chat/ProactiveAlert";
+import { AskAgentButton } from "@/components/chat/AskAgentButton";
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  roles?: string[];
+  badge?: number;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Apply Now", href: "/apply", icon: FilePlus, roles: ["employee"] },
+  { label: "My Applications", href: "/applications", icon: FolderOpen, roles: ["employee"] },
+  { label: "Benefit Balance", href: "/dashboard/balance", icon: Wallet, roles: ["employee"] },
+  { label: "HR Operations", href: "/hr-ops", icon: Settings2, roles: ["hr", "admin"] },
+  { label: "Scholarship Review", href: "/scholarship", icon: Trophy, roles: ["hr", "admin"] },
+  { label: "Service Agreements", href: "/service-agreements", icon: ShieldAlert, roles: ["employee", "hr", "admin"] },
+  { label: "Compliance Hub", href: "/compliance", icon: ShieldCheck, roles: ["hr", "admin"] },
+  { label: "Payroll Feed", href: "/payroll", icon: CreditCard, roles: ["hr", "admin"] },
+  {
+    label: "Case Management",
+    href: "/cases/case-001",
+    icon: FolderOpen,
+    roles: ["hr", "admin"],
+  },
+  {
+    label: "Manager Approvals",
+    href: "/approvals",
+    icon: CheckSquare,
+    roles: ["manager", "hr", "admin"],
+  },
+  { label: "Policy Admin", href: "/admin/policy", icon: Settings, roles: ["hr", "admin"] },
+  { label: "Notifications", href: "/notifications", icon: Bell },
+];
+
+interface LayoutProps {
+  children: React.ReactNode;
+  title?: string;
+  breadcrumbs?: { label: string; href?: string }[];
+  disableScroll?: boolean;
+}
+
+export function Layout({
+  children,
+  title,
+  breadcrumbs,
+  disableScroll = false,
+}: LayoutProps) {
+  const { theme, setTheme } = useTheme();
+  const {
+    currentUser,
+    logout,
+    sidebarCollapsed,
+    toggleSidebar,
+    unreadNotificationCount,
+    hasHydrated,
+    isChatOpen,
+  } = useAppStore();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (hasHydrated) {
+      // Find current item's required roles
+      const activeItem = NAV_ITEMS.find((item) => 
+        pathname === item.href || (item.href !== "/dashboard" && item.href !== "/" && pathname?.startsWith(item.href + "/"))
+      );
+      
+      if (activeItem?.roles) {
+        if (!currentUser || !activeItem.roles.includes(currentUser.role)) {
+          console.warn("Unauthorized access attempt. Redirecting...");
+          router.replace("/");
+        }
+      }
+    }
+  }, [hasHydrated, currentUser, pathname, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile && !sidebarCollapsed) {
+        toggleSidebar();
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []); // Only on mount
+
+  if (!hasHydrated) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Activity className="w-8 h-8 text-primary animate-pulse" />
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  const _userNotifications = mockNotifications.filter(
+    (n) =>
+      !n.read &&
+      (currentUser
+        ? n.userId === mockNotifications.find((x) => x.userId)?.userId
+        : true),
+  );
+  const unreadCount = unreadNotificationCount;
+
+  const filteredNav = NAV_ITEMS.filter((item) => {
+    if (!item.roles) return true;
+    const userRole = currentUser?.role || "employee"; // Default to employee for guest visibility
+    return item.roles.includes(userRole);
+  });
+
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+  const getRoleLabel = (role: string) => {
+    const map: Record<string, string> = {
+      employee: "Employee",
+      manager: "Manager",
+      hr: "HR Specialist",
+      admin: "Administrator",
+    };
+    return map[role] ?? role;
+  };
+
+
+  return (
+    <div className="flex h-screen bg-background overflow-hidden">
+      {/* Sidebar Overlay for mobile */}
+      {!sidebarCollapsed && isMobile && (
+        <div 
+          className="fixed inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out flex-shrink-0 z-30",
+          isMobile && "fixed inset-y-0 left-0",
+          sidebarCollapsed ? (isMobile ? "-translate-x-full" : "w-16") : "w-64 translate-x-0",
+        )}
+        data-ocid="sidebar"
+      >
+        {/* Logo */}
+        <div
+          className={cn(
+            "flex items-center border-b border-border h-16 px-4 flex-shrink-0",
+            sidebarCollapsed ? "justify-center" : "justify-between gap-3",
+          )}
+        >
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+                <Activity className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-bold font-display text-foreground leading-none truncate">
+                  MTRA
+                </div>
+                <div className="text-[10px] text-muted-foreground leading-tight truncate">
+                  Montefiore Health
+                </div>
+              </div>
+            </div>
+          )}
+          {sidebarCollapsed && (
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <Activity className="w-4 h-4 text-primary-foreground" />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className={cn(
+              "rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+              sidebarCollapsed && "hidden",
+            )}
+            aria-label={
+              sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+            }
+            data-ocid="sidebar.toggle"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav
+          className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5"
+          aria-label="Main navigation"
+        >
+          {filteredNav.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/dashboard" &&
+                item.href !== "/" &&
+                pathname?.startsWith(item.href + "/"));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 group",
+                  isActive
+                    ? "bg-primary/10 text-primary dark:bg-primary/20"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+                data-ocid={`nav.${item.label.toLowerCase().replace(/\s+/g, "_")}`}
+              >
+                <item.icon
+                  className={cn(
+                    "flex-shrink-0 transition-colors",
+                    sidebarCollapsed ? "w-5 h-5" : "w-4 h-4",
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground",
+                  )}
+                />
+                {!sidebarCollapsed && (
+                  <span className="truncate">{item.label}</span>
+                )}
+                {!sidebarCollapsed && item.badge && item.badge > 0 && (
+                  <Badge className="ml-auto text-[10px] h-4 px-1.5 bg-destructive text-destructive-foreground">
+                    {item.badge}
+                  </Badge>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Collapse toggle (when collapsed) */}
+        {sidebarCollapsed && (
+          <div className="px-2 pb-4">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="w-full flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label="Expand sidebar"
+              data-ocid="sidebar.expand"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* User section at bottom */}
+        {!sidebarCollapsed && (
+          <div className="border-t border-border p-3 flex-shrink-0">
+            <div className="flex items-center gap-2.5">
+              <Avatar className="w-8 h-8 flex-shrink-0">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                  {currentUser ? getInitials(currentUser.name) : "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold text-foreground truncate">
+                  {currentUser?.name ?? "Guest"}
+                </div>
+                <div className="text-[10px] text-muted-foreground truncate">
+                  {currentUser ? getRoleLabel(currentUser.role) : ""}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Main content area */}
+      <div className={cn(
+        "flex flex-col flex-1 min-w-0 overflow-hidden transition-all duration-300",
+        isChatOpen && "xl:pr-[400px]"
+      )}>
+        {/* Top Header */}
+        <header
+          className="flex items-center justify-between bg-card border-b border-border h-16 px-6 flex-shrink-0"
+          data-ocid="header"
+        >
+          <div className="flex items-center gap-4 min-w-0">
+            {/* Mobile menu */}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="lg:hidden p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+              data-ocid="header.menu_button"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            {/* Breadcrumbs / Page title */}
+            <div className="min-w-0 flex-1">
+              {breadcrumbs && breadcrumbs.length > 1 ? (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  {breadcrumbs.map((crumb, idx) => (
+                    <span
+                      key={crumb.label}
+                      className={cn(
+                        "flex items-center gap-1 min-w-0",
+                        idx < breadcrumbs.length - 2 && "hidden sm:flex"
+                      )}
+                    >
+                      {idx > 0 && <span className="text-border shrink-0">/</span>}
+                      {crumb.href && idx < breadcrumbs.length - 1 ? (
+                        <Link
+                          href={crumb.href}
+                          className="hover:text-foreground transition-colors truncate max-w-[80px] sm:max-w-[120px]"
+                        >
+                          {crumb.label}
+                        </Link>
+                      ) : (
+                        <span
+                          className={cn(
+                            "truncate",
+                            idx === breadcrumbs.length - 1
+                              ? "text-foreground font-semibold"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          {crumb.label}
+                        </span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <h1 className="text-base font-semibold font-display text-foreground truncate">
+                  {title ?? "MTRA"}
+                </h1>
+              )}
+            </div>
+          </div>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:block">
+              <AskAgentButton size="sm" />
+            </div>
+
+            {/* Theme toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-9 h-9 text-muted-foreground hover:text-foreground"
+              aria-label="Toggle theme"
+              data-ocid="header.theme_toggle"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+            </Button>
+
+            {/* Notifications */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-9 h-9 relative text-muted-foreground hover:text-foreground"
+              aria-label={`Notifications (${unreadCount} unread)`}
+              data-ocid="header.notifications_button"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Button>
+
+            {/* User dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 h-9 px-2 text-sm font-medium text-foreground hover:bg-muted"
+                  data-ocid="header.user_menu"
+                >
+                  <Avatar className="w-7 h-7">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      {currentUser ? getInitials(currentUser.name) : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:block max-w-32 truncate">
+                    {currentUser?.name ?? "Guest"}
+                  </span>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2">
+                  <div className="text-sm font-semibold text-foreground">
+                    {currentUser?.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {currentUser?.email}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="mt-1 text-[10px] px-1.5 py-0"
+                  >
+                    {currentUser ? getRoleLabel(currentUser.role) : ""}
+                  </Badge>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="gap-2"
+                  data-ocid="header.profile_link"
+                >
+                  <User className="w-4 h-4" />
+                  My Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="gap-2 text-destructive focus:text-destructive"
+                  onClick={handleLogout}
+                  data-ocid="header.logout_button"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main
+          className={cn(
+            "flex-1 bg-background",
+            !disableScroll ? "overflow-y-auto" : "flex flex-col min-h-0",
+          )}
+          data-ocid="main_content"
+        >
+          {children}
+        </main>
+        
+        {/* Global AI Chat Agent */}
+        <ProactiveAlert />
+        <ChatButton />
+        <ChatPanel />
+      </div>
+    </div>
+  );
+}
