@@ -186,7 +186,7 @@ export default function DashboardPage() {
   return (
     <Layout title="Dashboard" breadcrumbs={[{ label: "Dashboard" }]}>
       <div
-        className="p-6 space-y-6 max-w-7xl mx-auto"
+        className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto"
         data-ocid="dashboard.page"
       >
         {/* Welcome Banner */}
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             aria-hidden="true"
           />
 
-          <div className="relative z-10 flex items-start justify-between gap-4">
+          <div className="relative z-10 flex flex-col md:flex-row items-start md:justify-between gap-6">
             <div>
               <p className="text-blue-100 text-sm font-medium mb-0.5">
                 {greeting},

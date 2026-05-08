@@ -53,7 +53,7 @@ export default function ScholarshipPortal() {
     >
       <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-muted/20">
         {/* Left Sidebar: Applicant List */}
-        <aside className="w-full lg:w-80 bg-card border-r border-border flex flex-col h-full">
+        <aside className="w-full lg:w-80 bg-card border-r border-border flex flex-col h-[35vh] lg:h-full">
           <div className="p-4 border-b border-border bg-muted/30">
             <h2 className="text-sm font-bold flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
@@ -186,7 +186,7 @@ export default function ScholarshipPortal() {
                                                 <p className="text-[10px] text-muted-foreground max-w-md">{criteria.desc}</p>
                                              </div>
                                           </div>
-                                          <div className="flex items-center gap-2">
+                                          <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
                                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                                                <button
                                                   key={num}

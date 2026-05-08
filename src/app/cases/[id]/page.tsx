@@ -74,7 +74,7 @@ export default function CaseDetailsPage({
     >
       <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-muted/20">
         {/* Left Sidebar: Employee Profile */}
-        <aside className="w-full lg:w-72 bg-card border-r border-border overflow-y-auto flex-shrink-0">
+        <aside className="w-full lg:w-72 bg-card border-r border-border overflow-y-auto flex-shrink-0 h-[40vh] lg:h-full">
           <div className="p-6 space-y-6">
             <div className="flex flex-col items-center text-center space-y-3">
               <Avatar className="w-20 h-20 border-2 border-primary/10 shadow-sm">
@@ -243,7 +243,7 @@ export default function CaseDetailsPage({
              </Card>
 
              <Tabs defaultValue="timeline" className="w-full">
-                <TabsList className="bg-[#eff6f8] p-1.5 h-auto rounded-xl inline-flex items-center gap-1 border-none mb-6">
+                <TabsList className="bg-[#eff6f8] p-1.5 h-auto rounded-xl inline-flex items-center gap-1 border-none mb-6 max-w-full overflow-x-auto no-scrollbar">
                    <TabsTrigger 
                       value="timeline" 
                       className="rounded-lg px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all"
@@ -442,8 +442,9 @@ export default function CaseDetailsPage({
                       <CardHeader className="pb-2">
                          <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Audit History</CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4 px-0 pb-0">
-                         <Table>
+                       <CardContent className="pt-4 px-0 pb-0">
+                          <div className="overflow-x-auto">
+                             <Table>
                             <TableHeader>
                                <TableRow className="hover:bg-transparent bg-muted/30 border-b border-border">
                                   <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground h-10 px-6">Action</TableHead>
@@ -477,8 +478,9 @@ export default function CaseDetailsPage({
                                  </TableRow>
                                ))}
                             </TableBody>
-                         </Table>
-                      </CardContent>
+                             </Table>
+                          </div>
+                       </CardContent>
                    </Card>
                 </TabsContent>
              </Tabs>
@@ -486,7 +488,7 @@ export default function CaseDetailsPage({
         </div>
 
         {/* Right Sidebar: AI & Compliance */}
-        <aside className="w-full lg:w-80 bg-card border-l border-border overflow-y-auto flex-shrink-0">
+        <aside className="w-full lg:w-80 bg-card border-l border-border overflow-y-auto flex-shrink-0 h-[40vh] lg:h-full">
           <div className="p-6 space-y-6">
              <Card className="border-emerald-500/20 bg-emerald-500/5 overflow-hidden shadow-sm">
                 <CardHeader className="p-4 border-b border-emerald-500/10">

@@ -136,7 +136,7 @@ export default function ComplianceDashboard() {
                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Program Spend Breakdown</CardTitle>
                      <BarChart3 className="w-4 h-4 text-muted-foreground opacity-40" />
                   </CardHeader>
-                  <CardContent className="h-[240px] pt-4">
+                  <CardContent className="h-[200px] sm:h-[240px] pt-4">
                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={SPEND_DATA} layout="vertical" margin={{ left: -20 }}>
                            <XAxis type="number" hide />
@@ -176,7 +176,7 @@ export default function ComplianceDashboard() {
                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground">IRS §127 Tax Optimization</CardTitle>
                      <PieChart className="w-4 h-4 text-muted-foreground opacity-40" />
                   </CardHeader>
-                  <CardContent className="flex flex-col items-center justify-center h-[240px] pt-4">
+                  <CardContent className="flex flex-col items-center justify-center h-[200px] sm:h-[240px] pt-4">
                      <div className="h-[160px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                            <RePieChart>

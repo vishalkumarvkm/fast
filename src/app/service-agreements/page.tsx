@@ -73,7 +73,7 @@ export default function ServiceAgreementsPage() {
     >
       <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-muted/20">
         {/* Main List */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold font-display text-foreground">Service Agreement Tracker</h1>
@@ -88,17 +88,18 @@ export default function ServiceAgreementsPage() {
 
           <Card className="border-border shadow-sm overflow-hidden">
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border">
-                    <TableHead className="text-[10px] font-bold uppercase px-6 h-11">Employee</TableHead>
-                    <TableHead className="text-[10px] font-bold uppercase h-11">Amount</TableHead>
-                    <TableHead className="text-[10px] font-bold uppercase h-11">Commitment End</TableHead>
-                    <TableHead className="text-[10px] font-bold uppercase h-11">Status</TableHead>
-                    <TableHead className="text-[10px] font-bold uppercase h-11 text-right pr-6">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border">
+                      <TableHead className="text-[10px] font-bold uppercase px-6 h-11">Employee</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase h-11">Amount</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase h-11">Commitment End</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase h-11">Status</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase h-11 text-right pr-6">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                   {mockServiceAgreements.map((sa) => (
                     <TableRow 
                       key={sa.id} 
@@ -134,7 +135,8 @@ export default function ServiceAgreementsPage() {
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
+            </div>
+          </CardContent>
           </Card>
 
           {/* Repayment Calculator (Static view for selected) */}
@@ -219,7 +221,7 @@ export default function ServiceAgreementsPage() {
         </div>
 
         {/* Right Sidebar: Recent Activity & Alerts */}
-        <aside className="w-full lg:w-80 bg-card border-l border-border p-6 space-y-6 overflow-y-auto">
+        <aside className="w-full lg:w-80 bg-card border-l border-border p-6 space-y-6 overflow-y-auto h-[40vh] lg:h-full">
           <Card className="border-amber-500/20 bg-amber-500/5 overflow-hidden shadow-sm">
              <CardHeader className="p-4 border-b border-amber-500/10">
                 <div className="flex items-center gap-2">

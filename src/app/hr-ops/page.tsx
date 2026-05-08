@@ -258,7 +258,7 @@ export default function HROpsPage() {
                     </Tabs>
                  </div>
                  <div className="px-6 py-4 bg-muted/10 border-t border-border flex flex-wrap items-center gap-4">
-                    <div className="relative flex-1 min-w-[300px]">
+                    <div className="relative flex-1 min-w-[200px]">
                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                        <Input 
                           placeholder="Search cases..." 

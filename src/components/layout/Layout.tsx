@@ -341,7 +341,7 @@ export function Layout({
       )}>
         {/* Top Header */}
         <header
-          className="flex items-center justify-between bg-card border-b border-border h-16 px-6 flex-shrink-0"
+          className="flex items-center justify-between bg-card border-b border-border h-16 px-4 sm:px-6 flex-shrink-0"
           data-ocid="header"
         >
           <div className="flex items-center gap-4 min-w-0">
@@ -496,7 +496,7 @@ export function Layout({
         <main
           className={cn(
             "flex-1 bg-background",
-            !disableScroll ? "overflow-y-auto" : "flex flex-col min-h-0",
+            !disableScroll ? "overflow-y-auto px-4 sm:px-0" : "flex flex-col min-h-0",
           )}
           data-ocid="main_content"
         >
